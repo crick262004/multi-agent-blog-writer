@@ -1,6 +1,6 @@
 # Multi-Agent Blog Writer
 
-A small multi-agent system built with [Google's Agent Development Kit (ADK)](https://google.github.io/adk-docs/) that turns a topic prompt into a full technical blog post. Built by following [this Google codelab](https://codelabs.developers.google.com/build-ai-agent-google-adk).
+A small multi-agent system built with [Google's Agent Development Kit (ADK)](https://google.github.io/adk-docs/) that turns a topic prompt into a full technical blog post. 
 
 ## What it does
 
