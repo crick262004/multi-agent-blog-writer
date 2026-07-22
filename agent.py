@@ -6,6 +6,8 @@ import datetime
 from dotenv import load_dotenv
 from google.adk.agents import Agent, LoopAgent
 from google.adk.tools import agent_tool
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioConnectionParams
+from mcp import StdioServerParameters
 
 # env config
 load_dotenv()
@@ -92,20 +94,38 @@ robust_blog_writer = LoopAgent(
 planner_tool = agent_tool.AgentTool(agent=robust_blog_planner)
 writer_tool  = agent_tool.AgentTool(agent=robust_blog_writer)
 
-# Root Agent: Plan → Write 
+# MCP Toolset: Google Trends (points to local server.py)
+trends_mcp_server = StdioServerParameters(
+   command="python3",
+   args=[str(Path(__file__).parent / "server.py")],
+)
+
+trends_mcp = MCPToolset(
+   connection_params=StdioConnectionParams(
+       server_params=trends_mcp_server
+   )
+)
+
+# Root Agent: Trends → Plan → Write
 root_agent = Agent(
    name="Blogger",
    model=MODEL,
-   description="Minimal multi-agent blogger that plans and writes.",
+   description="Minimal multi-agent blogger that uses an MCP Trends tool once, then plans and writes.",
    instruction=f"""
 If the user gives a topic:
-1) Call the planner tool to generate the outline.
-2) Call the writer tool to produce the full draft.
-3) End with 3 alternate titles and 2 tweet-length hooks.
+1) Call the MCP tool `trends` with geo="US", timeframe="now 7-d", quick=true.
+  - Summarize the related.rising queries (3–5 bullets) and note any clear themes.
+  - Pick one best angle and proceed.
+2) Call the planner tool to generate the outline.
+3) Call the writer tool to produce the full draft.
+4) End with 3 alternate titles and 2 tweet-length hooks.
+
+If the trends tool fails or times out, continue with a sensible outline and draft anyway.
 
 Date: {datetime.datetime.now().strftime("%Y-%m-%d")}
 """,
    tools=[
+       trends_mcp,
        planner_tool, # calls RobustBlogPlanner
        writer_tool,  # calls RobustBlogWriter
    ],

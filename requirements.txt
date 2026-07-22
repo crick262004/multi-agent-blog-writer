@@ -1,3 +1,6 @@
 google-adk
 python-dotenv
 python-multipart
+mcp
+pytrends
+pandas
