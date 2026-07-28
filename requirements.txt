@@ -4,3 +4,7 @@ python-multipart
 mcp
 pytrends
 pandas
+google-cloud-storage
+google-genai
+google-auth
+Pillow
